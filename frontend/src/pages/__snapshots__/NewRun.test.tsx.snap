@@ -95,6 +95,18 @@ exports[`NewRun changes the exit button's text if query params indicate this is 
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -172,6 +184,10 @@ exports[`NewRun changes the exit button's text if query params indicate this is 
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -508,6 +524,18 @@ exports[`NewRun choosing a pipeline cloning from a run shows pipeline selector w
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -581,6 +609,10 @@ exports[`NewRun choosing a pipeline cloning from a run shows pipeline selector w
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -880,6 +912,18 @@ exports[`NewRun choosing a pipeline cloning from a run shows switching controls 
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -953,6 +997,10 @@ exports[`NewRun choosing a pipeline cloning from a run shows switching controls 
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -1257,6 +1305,18 @@ exports[`NewRun choosing a pipeline creating a new recurring run includes additi
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -1330,6 +1390,10 @@ exports[`NewRun choosing a pipeline creating a new recurring run includes additi
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -1645,6 +1709,18 @@ exports[`NewRun choosing a pipeline creating a new run copies pipeline from run 
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -1729,6 +1805,10 @@ exports[`NewRun choosing a pipeline creating a new run copies pipeline from run 
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -2056,6 +2136,18 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline in s
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -2140,6 +2232,10 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline in s
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -2497,6 +2593,18 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline para
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -2574,6 +2682,10 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline para
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -2884,6 +2996,18 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline para
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -2961,6 +3085,10 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline para
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -3307,6 +3435,18 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline para
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -3384,6 +3524,10 @@ exports[`NewRun choosing a pipeline creating a new run updates the pipeline para
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -3694,6 +3838,18 @@ exports[`NewRun fetches the associated pipeline if one is present in the query p
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -3767,6 +3923,10 @@ exports[`NewRun fetches the associated pipeline if one is present in the query p
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -4073,6 +4233,18 @@ exports[`NewRun renders the new run page 1`] = `
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -4150,6 +4322,10 @@ exports[`NewRun renders the new run page 1`] = `
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {
@@ -4460,6 +4636,18 @@ exports[`NewRun updates the run's state with the associated experiment if one is
           match=""
           selectionChanged={[Function]}
           title="Choose a pipeline"
+          toolbarActions={
+            Array [
+              Object {
+                "action": [Function],
+                "icon": [Function],
+                "id": "uploadBtn",
+                "outlined": true,
+                "title": "Upload pipeline",
+                "tooltip": "Upload pipeline",
+              },
+            ]
+          }
           toolbarProps={
             Object {
               "actions": Array [],
@@ -4537,6 +4725,10 @@ exports[`NewRun updates the run's state with the associated experiment if one is
         </WithStyles(Button)>
       </WithStyles(DialogActions)>
     </WithStyles(Dialog)>
+    <UploadPipelineDialog
+      onClose={[Function]}
+      open={false}
+    />
     <WithStyles(Dialog)
       PaperProps={
         Object {

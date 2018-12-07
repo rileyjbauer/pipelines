@@ -15,6 +15,7 @@
  */
 
 import * as React from 'react';
+import AddIcon from '@material-ui/icons/Add';
 import BusyButton from '../atoms/BusyButton';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -43,6 +44,7 @@ import { Workflow } from '../../../frontend/third_party/argo-ui/argo_template';
 import { classes, stylesheet } from 'typestyle';
 import { commonCss, padding, color } from '../Css';
 import { logger, errorToMessage } from '../lib/Utils';
+import UploadPipelineDialog from '../components/UploadPipelineDialog';
 
 interface NewRunState {
   pipelineFromRun?: ApiPipeline;
@@ -66,6 +68,7 @@ interface NewRunState {
   trigger?: ApiTrigger;
   unconfirmedSelectedExperiment?: ApiExperiment;
   unconfirmedSelectedPipeline?: ApiPipeline;
+  uploadDialogOpen: boolean;
   usePipelineFromRun: boolean;
   usePipelineFromRunLabel: string;
 }
@@ -107,6 +110,7 @@ class NewRun extends Page<{}, NewRunState> {
       pipelineName: '',
       pipelineSelectorOpen: false,
       runName: '',
+      uploadDialogOpen: false,
       usePipelineFromRun: false,
       usePipelineFromRunLabel: 'Use pipeline from cloned run',
     };
@@ -182,6 +186,14 @@ class NewRun extends Page<{}, NewRunState> {
             PaperProps={{ id: 'pipelineSelectorDialog' }}>
             <DialogContent>
               <ResourceSelector {...this.props}
+                toolbarActions={[{
+                  action: this._uploadPipeline.bind(this),
+                  icon: AddIcon,
+                  id: 'uploadBtn',
+                  outlined: true,
+                  title: 'Upload pipeline',
+                  tooltip: 'Upload pipeline',
+                }]}
                 title='Choose a pipeline'
                 listApi={async (...args) => {
                   const response = await Apis.pipelineServiceApi.listPipelines(...args);
@@ -203,6 +215,9 @@ class NewRun extends Page<{}, NewRunState> {
               </Button>
             </DialogActions>
           </Dialog>
+
+          <UploadPipelineDialog open={this.state.uploadDialogOpen}
+            onClose={this._uploadDialogClosed.bind(this)} />
 
           <Dialog open={experimentSelectorOpen}
             classes={{ paper: css.selectorDialog }}
@@ -434,6 +449,12 @@ class NewRun extends Page<{}, NewRunState> {
     this._validate();
   }
 
+  /** Closes the open pipelineSelector and then opens the upload pipeline dialog in its place */
+  private _uploadPipeline(): void {
+    // TODO: Should this be executed as: close selector, and then open dialog via callback?
+    this.setStateSafe({ pipelineSelectorOpen: false, uploadDialogOpen: true });
+  }
+
   private async _prepareFormFromClone(originalRun: ApiRunDetail): Promise<void> {
     if (!originalRun.run) {
       logger.error('Could not get cloned run details');
@@ -596,6 +617,27 @@ class NewRun extends Page<{}, NewRunState> {
     } else {
       const cloneNumber = match[1] ? +match[1] : 1;
       return `Clone (${cloneNumber + 1}) of ${match[2]}`;
+    }
+  }
+
+  private async _uploadDialogClosed(name: string, file: File | null, description?: string): Promise<boolean> {
+    if (!!file) {
+      try {
+        const uploadedPipeline = await Apis.uploadPipeline(name, file);
+        this.setStateSafe({
+          pipeline: uploadedPipeline,
+          pipelineName: (uploadedPipeline && uploadedPipeline.name) || '',
+          uploadDialogOpen: false
+        });
+        return true;
+      } catch (err) {
+        const errorMessage = await errorToMessage(err);
+        this.showErrorDialog('Failed to upload pipeline', errorMessage);
+        return false;
+      }
+    } else {
+      this.setStateSafe({ uploadDialogOpen: false });
+      return false;
     }
   }
 

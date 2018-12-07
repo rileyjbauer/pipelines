@@ -160,6 +160,7 @@ class UploadPipelineDialog extends React.Component<UploadPipelineDialogProps, Up
           busy: false,
           dropzoneActive: false,
           file: null,
+          fileName: '',
           uploadPipelineDescription: '',
           uploadPipelineName: '',
         });
