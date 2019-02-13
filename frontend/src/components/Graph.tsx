@@ -227,31 +227,64 @@ export default class Graph extends React.Component<GraphProps, GraphState> {
             // If the points given form a diagonal line, then split that line into 3 segments, two
             // vertical, and one horizontal.
 
+            if (i === 1) {
+              // Down first, then horizontal
+              segments.push({
+                height: y2 - y1 + 2,
+                left: this.LEFT_OFFSET + x1,
+                top: this.TOP_OFFSET + y1,
+                width: this.EDGE_THICKNESS,
+              });
+
+              segments.push({
+                height: this.EDGE_THICKNESS,
+                left: this.LEFT_OFFSET + Math.min(x1, x2),
+                top: this.TOP_OFFSET + y2,
+                width: Math.abs(x2 - x1) + 1,
+              });
+            }
+
+            if (i === edge.points.length - 1) {
+              // Horizontal first, then down
+              segments.push({
+                height: this.EDGE_THICKNESS,
+                left: this.LEFT_OFFSET + Math.min(x1, x2),
+                top: this.TOP_OFFSET + y1,
+                width: Math.abs(x2 - x1) + 1,
+              });
+
+              segments.push({
+                height: y2 - y1 + 2,
+                left: this.LEFT_OFFSET + x2,
+                top: this.TOP_OFFSET + y1,
+                width: this.EDGE_THICKNESS,
+              });
+            }
             // Vertical segment 1
-            const verticalSegmentLength = (y2 - y1) / 2;
-            segments.push({
-              height: verticalSegmentLength + 2,
-              left: this.LEFT_OFFSET + x1,
-              top: this.TOP_OFFSET + y1,
-              width: this.EDGE_THICKNESS,
-            });
+            // const verticalSegmentLength = (y2 - y1) / 2;
+            // segments.push({
+            //   height: verticalSegmentLength + 2,
+            //   left: this.LEFT_OFFSET + x1,
+            //   top: this.TOP_OFFSET + y1,
+            //   width: this.EDGE_THICKNESS,
+            // });
 
             // Horizontal segment
-            const horizontalSegmentLength = Math.abs(x2 - x1) + 1;
-            segments.push({
-              height: this.EDGE_THICKNESS,
-              left: this.LEFT_OFFSET + Math.min(x1, x2),
-              top: this.TOP_OFFSET + ((y1 + y2) / 2),
-              width: horizontalSegmentLength,
-            });
+            // const horizontalSegmentLength = Math.abs(x2 - x1) + 1;
+            // segments.push({
+            //   height: this.EDGE_THICKNESS,
+            //   left: this.LEFT_OFFSET + Math.min(x1, x2),
+            //   top: this.TOP_OFFSET + ((y1 + y2) / 2),
+            //   width: horizontalSegmentLength,
+            // });
 
             // Vertical segment 2
-            segments.push({
-              height: verticalSegmentLength + 1,
-              left: this.LEFT_OFFSET + x2,
-              top: this.TOP_OFFSET + ((y1 + y2) / 2),
-              width: this.EDGE_THICKNESS,
-            });
+            // segments.push({
+            //   height: verticalSegmentLength + 1,
+            //   left: this.LEFT_OFFSET + x2,
+            //   top: this.TOP_OFFSET + ((y1 + y2) / 2),
+            //   width: this.EDGE_THICKNESS,
+            // });
           }
         }
       }
