@@ -266,6 +266,19 @@ export default class SideNav extends React.Component<SideNavProps, SideNavState>
             </Tooltip>
           )}
           <hr className={classes(css.separator, collapsed && css.collapsedSeparator)} />
+          <div className={classes(css.indicator, (page !== RoutePage.VIEWERS) && css.indicatorHidden)} />
+          <Tooltip title={'Tensorboards'} enterDelay={300} placement={'right-start'}
+            disableFocusListener={!collapsed} disableHoverListener={!collapsed}
+            disableTouchListener={!collapsed}>
+            <Link id='viewersBtn' to={RoutePage.VIEWERS} className={commonCss.unstyled}>
+              <Button className={classes(css.button,
+                page === RoutePage.VIEWERS && css.active,
+                collapsed && css.collapsedButton)}>
+                <ArchiveIcon style={{ height: 20, width: 20 }} />
+                <span className={classes(collapsed && css.collapsedLabel, css.label)}>Tensorboards</span>
+              </Button>
+            </Link>
+          </Tooltip>
           <div className={classes(css.indicator, (page !== RoutePage.ARCHIVE) && css.indicatorHidden)} />
           <Tooltip title={'Archive'} enterDelay={300} placement={'right-start'}
             disableFocusListener={!collapsed} disableHoverListener={!collapsed}

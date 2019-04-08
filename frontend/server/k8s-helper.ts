@@ -33,7 +33,7 @@ if (isInCluster) {
 /**
  * Creates a new Tensorboard pod.
  */
-export async function newTensorboardPod(logdir: string): Promise<void> {
+export async function newTensorboardPod(logdir: string, runId: string): Promise<void> {
   if (!k8sV1Client) {
     throw new Error('Cannot access kubernetes API');
   }
@@ -46,6 +46,9 @@ export async function newTensorboardPod(logdir: string): Promise<void> {
   const pod = {
     kind: 'Pod',
     metadata: {
+      annotations: {
+        runId: runId,
+      },
       generateName: 'tensorboard-',
     },
     spec: {

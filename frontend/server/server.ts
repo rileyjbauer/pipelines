@@ -184,7 +184,7 @@ const getTensorboardHandler = async (req, res) => {
   }
   const logdir = decodeURIComponent(req.query.logdir);
   if (!logdir) {
-    res.status(404).send('logdir argument is required');
+    res.status(404).send('logdir param is required');
     return;
   }
 
@@ -202,12 +202,17 @@ const createTensorboardHandler = async (req, res) => {
   }
   const logdir = decodeURIComponent(req.query.logdir);
   if (!logdir) {
-    res.status(404).send('logdir argument is required');
+    res.status(404).send('logdir param is required');
+    return;
+  }
+  const runId = decodeURIComponent(req.query.runId);
+  if (!runId) {
+    res.status(404).send('runId param is required');
     return;
   }
 
   try {
-    await k8sHelper.newTensorboardPod(logdir);
+    await k8sHelper.newTensorboardPod(logdir, runId);
     const tensorboardAddress = await k8sHelper.waitForTensorboard(logdir, 60 * 1000);
     res.send(tensorboardAddress);
   } catch (err) {
@@ -223,7 +228,7 @@ const logsHandler = async (req, res) => {
 
   const podName = decodeURIComponent(req.query.podname);
   if (!podName) {
-    res.status(404).send('podname argument is required');
+    res.status(404).send('podname param is required');
     return;
   }
 

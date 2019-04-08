@@ -35,6 +35,7 @@ import RunDetails from '../pages/RunDetails';
 import SideNav from './SideNav';
 import Snackbar, { SnackbarProps } from '@material-ui/core/Snackbar';
 import Toolbar, { ToolbarProps } from './Toolbar';
+import ViewerList from '../pages/ViewerList';
 import { Route, Switch, Redirect, HashRouter } from 'react-router-dom';
 import { classes, stylesheet } from 'typestyle';
 import { commonCss } from '../Css';
@@ -75,6 +76,7 @@ export const RoutePage = {
   RECURRING_RUN: `/recurringrun/details/:${RouteParams.runId}`,
   RUNS: '/runs',
   RUN_DETAILS: `/runs/details/:${RouteParams.runId}`,
+  VIEWERS: '/viewers',
 };
 
 export interface DialogProps {
@@ -127,6 +129,7 @@ class Router extends React.Component<{}, RouteComponentState> {
       { path: RoutePage.RECURRING_RUN, Component: RecurringRunDetails },
       { path: RoutePage.RUN_DETAILS, Component: RunDetails },
       { path: RoutePage.COMPARE, Component: Compare },
+      { path: RoutePage.VIEWERS, Component: ViewerList },
     ];
 
     return (

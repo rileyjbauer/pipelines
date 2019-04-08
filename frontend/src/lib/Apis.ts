@@ -112,11 +112,11 @@ export class Apis {
   /**
    * Starts a deployment and service for Tensorboard given the logdir
    */
-  public static startTensorboardApp(logdir: string): Promise<string> {
+  public static startTensorboardApp(logdir: string, parentRunId: string): Promise<string> {
     return this._fetch(
-      `apps/tensorboard?logdir=${encodeURIComponent(logdir)}`,
+      'apps/tensorboard',
       undefined,
-      undefined,
+      `logdir=${encodeURIComponent(logdir)}&runId=${encodeURIComponent(parentRunId)}`,
       { headers: { 'content-type': 'application/json', }, method: 'POST', }
     );
   }
