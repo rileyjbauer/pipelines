@@ -58,10 +58,6 @@ interface SelectedNodeDetails {
   viewerConfigs?: ViewerConfig[];
 }
 
-interface RunDetailsProps {
-  runId?: string;
-}
-
 interface AnnotatedConfig {
   config: ViewerConfig;
   stepName: string;
@@ -104,7 +100,7 @@ export const css = stylesheet({
   },
 });
 
-class RunDetails extends Page<RunDetailsProps, RunDetailsState> {
+class RunDetails extends Page<{}, RunDetailsState> {
   private _onBlur: EventListener;
   private _onFocus: EventListener;
   private readonly AUTO_REFRESH_INTERVAL = 5000;
@@ -142,7 +138,7 @@ class RunDetails extends Page<RunDetailsProps, RunDetailsState> {
         ),
       ],
       breadcrumbs: [{ displayName: 'Experiments', href: RoutePage.EXPERIMENTS }],
-      pageTitle: this.props.runId!,
+      pageTitle: this.props.match.params[RouteParams.runId],
     };
   }
 
@@ -450,7 +446,7 @@ class RunDetails extends Page<RunDetailsProps, RunDetailsState> {
     const outputPathsList = WorkflowParser.loadAllOutputPathsWithStepNames(workflow);
 
     const configLists =
-      await Promise.all(outputPathsList.map(({ stepName, path }) => OutputArtifactLoader.load(path, this.props.runId!)
+      await Promise.all(outputPathsList.map(({ stepName, path }) => OutputArtifactLoader.load(path, this.props.match.params[RouteParams.runId])
         .then(configs => configs.map(config => ({ config, stepName })))));
     const allArtifactConfigs = flatten(configLists);
 
@@ -514,7 +510,7 @@ class RunDetails extends Page<RunDetailsProps, RunDetailsState> {
       // Load the viewer configurations from the output paths
       let viewerConfigs: ViewerConfig[] = [];
       for (const path of outputPaths) {
-        viewerConfigs = viewerConfigs.concat(await OutputArtifactLoader.load(path, this.props.runId!));
+        viewerConfigs = viewerConfigs.concat(await OutputArtifactLoader.load(path, this.props.match.params[RouteParams.runId]));
       }
 
       selectedNodeDetails.viewerConfigs = viewerConfigs;

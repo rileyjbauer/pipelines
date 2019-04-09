@@ -102,6 +102,10 @@ export class Apis {
       `?source=${path.source}&bucket=${path.bucket}&key=${encodeURIComponent(path.key)}`);
   }
 
+  public static getViewers(): Promise<string> {
+    return this._fetch('viewers/get');
+  }
+
   /**
    * Gets the address (IP + port) of a Tensorboard service given the logdir
    */

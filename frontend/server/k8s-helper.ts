@@ -97,7 +97,7 @@ export async function getTensorboardInstances(): Promise<string> {
   return JSON.stringify(pods.filter((p) =>
     p.status.phase === 'Running' &&
     !p.metadata.deletionTimestamp && // Terminating/terminated pods have this set
-    !!p.spec.containers.find((c) => c.args.findIndex(a => a === 'tensorboard') !== -1))
+    !!p.spec.containers.find((c) => c.args && (c.args.findIndex(a => a === 'tensorboard') !== -1)))
     .map(p => {{
       p.metadata.annotations
     }}));
