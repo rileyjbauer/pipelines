@@ -28,19 +28,19 @@ describe('Tensorboard', () => {
   });
 
   it('does not break on empty data', () => {
-    const config = { type: PlotType.TENSORBOARD, url: '' };
+    const config = { type: PlotType.TENSORBOARD, runId: '', url: '' };
     const tree = shallow(<TensorboardViewer configs={[config]} />);
     expect(tree).toMatchSnapshot();
   });
 
   it('does not break on empty data', () => {
-    const config = { type: PlotType.TENSORBOARD, url: 'http://test/url' };
+    const config = { type: PlotType.TENSORBOARD, runId: 'some-id', url: 'http://test/url' };
     const tree = shallow(<TensorboardViewer configs={[config]} />);
     expect(tree).toMatchSnapshot();
   });
 
   it('shows a link to the tensorboard instance if exists', async () => {
-    const config = { type: PlotType.TENSORBOARD, url: 'http://test/url' };
+    const config = { type: PlotType.TENSORBOARD, runId: 'some-id', url: 'http://test/url' };
     const mockGetApp = () => Promise.resolve('test/address');
     jest.spyOn(Apis, 'getTensorboardApp').mockImplementationOnce(mockGetApp);
     const tree = shallow(<TensorboardViewer configs={[config]} />);
@@ -50,7 +50,7 @@ describe('Tensorboard', () => {
   });
 
   it('shows start button if no instance exists', async () => {
-    const config = { type: PlotType.TENSORBOARD, url: 'http://test/url' };
+    const config = { type: PlotType.TENSORBOARD, runId: 'some-id', url: 'http://test/url' };
     const getAppMock = () => Promise.resolve('');
     const spy = jest.spyOn(Apis, 'getTensorboardApp').mockImplementationOnce(getAppMock);
     const tree = shallow(<TensorboardViewer configs={[config]} />);
@@ -61,7 +61,7 @@ describe('Tensorboard', () => {
   });
 
   it('starts tensorboard instance when button is clicked', async () => {
-    const config = { type: PlotType.TENSORBOARD, url: 'http://test/url' };
+    const config = { type: PlotType.TENSORBOARD, runId: 'some-id', url: 'http://test/url' };
     const getAppMock = () => Promise.resolve('');
     const startAppMock = jest.fn(() => Promise.resolve(''));
     jest.spyOn(Apis, 'getTensorboardApp').mockImplementationOnce(getAppMock);
@@ -75,8 +75,8 @@ describe('Tensorboard', () => {
   });
 
   it('starts tensorboard instance for two configs', async () => {
-    const config = { type: PlotType.TENSORBOARD, url: 'http://test/url' };
-    const config2 = { type: PlotType.TENSORBOARD, url: 'http://test/url2' };
+    const config = { type: PlotType.TENSORBOARD, runId: 'some-id', url: 'http://test/url' };
+    const config2 = { type: PlotType.TENSORBOARD, runId: 'some-other-id', url: 'http://test/url2' };
     const getAppMock = jest.fn(() => Promise.resolve(''));
     const startAppMock = jest.fn(() => Promise.resolve(''));
     jest.spyOn(Apis, 'getTensorboardApp').mockImplementationOnce(getAppMock);

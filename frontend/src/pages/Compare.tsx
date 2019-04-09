@@ -222,12 +222,13 @@ class Compare extends Page<{}, CompareState> {
 
     await Promise.all(outputPathsList.map(async (pathList, i) => {
       for (const path of pathList) {
-        const configs = await OutputArtifactLoader.load(path);
+        const runId = runs[i].run!.id!;
+        const configs = await OutputArtifactLoader.load(path, runId);
         configs.map(config => {
           const currentList: TaggedViewerConfig[] = viewersMap.get(config.type) || [];
           currentList.push({
             config,
-            runId: runs[i].run!.id!,
+            runId,
             runName: runs[i].run!.name!,
           });
           viewersMap.set(config.type, currentList);
@@ -235,7 +236,7 @@ class Compare extends Page<{}, CompareState> {
       }
     }));
 
-    // For each output artifact type, list all artifact instances in all runs	
+    // For each output artifact type, list all artifact instances in all runs
     this.setStateSafe({ viewersMap });
   }
 

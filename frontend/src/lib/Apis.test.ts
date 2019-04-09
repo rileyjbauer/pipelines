@@ -107,7 +107,7 @@ describe('Apis', () => {
 
   it('startTensorboardApp', async () => {
     const spy = fetchSpy('http://some/address');
-    await Apis.startTensorboardApp('gs://log/dir');
+    await Apis.startTensorboardApp('gs://log/dir', 'some-run-id');
     expect(spy).toHaveBeenCalledWith(
       'apps/tensorboard?logdir=' + encodeURIComponent('gs://log/dir'),
       { credentials: 'same-origin', method: 'POST', headers: { 'content-type': 'application/json' } },

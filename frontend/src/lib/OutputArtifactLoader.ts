@@ -44,7 +44,7 @@ export interface OutputMetadata {
 
 export class OutputArtifactLoader {
 
-  public static async load(outputPath: StoragePath): Promise<ViewerConfig[]> {
+  public static async load(outputPath: StoragePath, runId: string): Promise<ViewerConfig[]> {
     let plotMetadataList: PlotMetadata[] = [];
     try {
       const metadataFile = await Apis.readFile(outputPath);
@@ -75,7 +75,7 @@ export class OutputArtifactLoader {
           case (PlotType.TABLE):
             return await this.buildPagedTableConfig(metadata);
           case (PlotType.TENSORBOARD):
-            return await this.buildTensorboardConfig(metadata);
+            return await this.buildTensorboardConfig(metadata, runId);
           case (PlotType.WEB_APP):
             return await this.buildHtmlViewerConfig(metadata);
           case (PlotType.ROC):
@@ -170,12 +170,13 @@ export class OutputArtifactLoader {
     };
   }
 
-  public static async buildTensorboardConfig(metadata: PlotMetadata): Promise<TensorboardViewerConfig> {
+  public static async buildTensorboardConfig(metadata: PlotMetadata, runId: string): Promise<TensorboardViewerConfig> {
     if (!metadata.source) {
       throw new Error('Malformed metadata, property "source" is required.');
     }
     WorkflowParser.parseStoragePath(metadata.source);
     return {
+      runId,
       type: PlotType.TENSORBOARD,
       url: metadata.source,
     };

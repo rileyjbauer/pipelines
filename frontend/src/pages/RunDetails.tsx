@@ -450,7 +450,7 @@ class RunDetails extends Page<RunDetailsProps, RunDetailsState> {
     const outputPathsList = WorkflowParser.loadAllOutputPathsWithStepNames(workflow);
 
     const configLists =
-      await Promise.all(outputPathsList.map(({ stepName, path }) => OutputArtifactLoader.load(path)
+      await Promise.all(outputPathsList.map(({ stepName, path }) => OutputArtifactLoader.load(path, this.props.runId!)
         .then(configs => configs.map(config => ({ config, stepName })))));
     const allArtifactConfigs = flatten(configLists);
 
@@ -514,7 +514,7 @@ class RunDetails extends Page<RunDetailsProps, RunDetailsState> {
       // Load the viewer configurations from the output paths
       let viewerConfigs: ViewerConfig[] = [];
       for (const path of outputPaths) {
-        viewerConfigs = viewerConfigs.concat(await OutputArtifactLoader.load(path));
+        viewerConfigs = viewerConfigs.concat(await OutputArtifactLoader.load(path, this.props.runId!));
       }
 
       selectedNodeDetails.viewerConfigs = viewerConfigs;

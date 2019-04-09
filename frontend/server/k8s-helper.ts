@@ -33,7 +33,7 @@ if (isInCluster) {
 /**
  * Creates a new Tensorboard pod.
  */
-export async function newTensorboardPod(logdir: string, runId: string): Promise<void> {
+export async function newTensorboardPod(logdir: string, runIds: string): Promise<void> {
   if (!k8sV1Client) {
     throw new Error('Cannot access kubernetes API');
   }
@@ -47,7 +47,9 @@ export async function newTensorboardPod(logdir: string, runId: string): Promise<
     kind: 'Pod',
     metadata: {
       annotations: {
-        runId: runId,
+        logDirs: logdir,
+        // TODO: Should we also list run names here to avoid having to retrieve them via API calls?
+        runIds: runIds,
       },
       generateName: 'tensorboard-',
     },
@@ -82,6 +84,24 @@ export async function newTensorboardPod(logdir: string, runId: string): Promise<
   };
 
   await k8sV1Client.createNamespacedPod(namespace, pod as any);
+}
+
+/**
+ * Returns pod IP, port, and run ID of all running Tensorboard pods.
+ */
+export async function getTensorboardInstances(): Promise<string> {
+  if (!k8sV1Client) {
+    throw new Error('Cannot access kubernetes API');
+  }
+  const pods = (await k8sV1Client.listNamespacedPod(namespace)).body.items;
+  return JSON.stringify(pods.filter((p) =>
+    p.status.phase === 'Running' &&
+    !p.metadata.deletionTimestamp && // Terminating/terminated pods have this set
+    !!p.spec.containers.find((c) => c.args.findIndex(a => a === 'tensorboard') !== -1))
+    .map(p => {{
+      p.metadata.annotations
+    }}));
+  // return pod && pod.status.podIP ? `${pod.status.podIP}:6006` : '';
 }
 
 /**

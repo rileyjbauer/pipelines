@@ -22,6 +22,7 @@ import { Apis } from '../../lib/Apis';
 import { commonCss, padding } from '../../Css';
 
 export interface TensorboardViewerConfig extends ViewerConfig {
+  runId: string;
   url: string;
 }
 
@@ -77,9 +78,15 @@ class TensorboardViewer extends Viewer<TensorboardViewerProps, TensorboardViewer
     </div>;
   }
 
+  private _flattenRunIds(): string {
+    // TODO: Should we sort this like we do the URLs? Should both be sorted by URL?
+    const runIds = this.props.configs.map(c => c.runId);
+    return runIds.map((r, i) => `Run${i + 1}:` + r).join(',');
+  }
+
   private _buildUrl(): string {
     const urls = this.props.configs.map(c => c.url).sort();
-    return urls.length === 1 ? urls[0] : urls.map((c, i) => `Series${i + 1}:` + c).join(',');
+    return urls.length === 1 ? urls[0] : urls.map((u, i) => `Series${i + 1}:` + u).join(',');
   }
 
   private async _checkTensorboardApp(): Promise<void> {
@@ -91,7 +98,8 @@ class TensorboardViewer extends Viewer<TensorboardViewerProps, TensorboardViewer
 
   private async _startTensorboard(): Promise<void> {
     this.setState({ busy: true }, async () => {
-      await Apis.startTensorboardApp(encodeURIComponent(this._buildUrl()));
+      await Apis.startTensorboardApp(
+        encodeURIComponent(this._buildUrl()), encodeURIComponent(this._flattenRunIds()));
       this.setState({ busy: false }, () => {
         this._checkTensorboardApp();
       });

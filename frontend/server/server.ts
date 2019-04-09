@@ -177,6 +177,19 @@ const artifactsHandler = async (req, res) => {
   }
 };
 
+const getTensorboardInstances = async (req, res) => {
+  if (!k8sHelper.isInCluster) {
+    res.status(500).send('Cannot talk to Kubernetes master');
+    return;
+  }
+
+  try {
+    res.send(await k8sHelper.getTensorboardInstances());
+  } catch (err) {
+    res.status(500).send('Failed to list Tensorboard pods: ' + err);
+  }
+};
+
 const getTensorboardHandler = async (req, res) => {
   if (!k8sHelper.isInCluster) {
     res.status(500).send('Cannot talk to Kubernetes master');
@@ -205,14 +218,14 @@ const createTensorboardHandler = async (req, res) => {
     res.status(404).send('logdir param is required');
     return;
   }
-  const runId = decodeURIComponent(req.query.runId);
-  if (!runId) {
+  const runIds = decodeURIComponent(req.query.runIds);
+  if (!runIds) {
     res.status(404).send('runId param is required');
     return;
   }
 
   try {
-    await k8sHelper.newTensorboardPod(logdir, runId);
+    await k8sHelper.newTensorboardPod(logdir, runIds);
     const tensorboardAddress = await k8sHelper.waitForTensorboard(logdir, 60 * 1000);
     res.send(tensorboardAddress);
   } catch (err) {
@@ -244,6 +257,9 @@ app.get(BASEPATH + '/' + v1beta1Prefix + '/healthz', healthzHandler);
 
 app.get('/artifacts/get', artifactsHandler);
 app.get(BASEPATH + '/artifacts/get', artifactsHandler);
+
+app.get('/viewers/get', getTensorboardInstances);
+app.get(BASEPATH + '/viewers/get', getTensorboardInstances);
 
 app.get('/apps/tensorboard', getTensorboardHandler);
 app.get(BASEPATH + '/apps/tensorboard', getTensorboardHandler);

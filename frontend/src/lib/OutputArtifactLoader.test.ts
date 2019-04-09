@@ -34,7 +34,7 @@ describe('OutputArtifactLoader', () => {
   describe('loadOutputArtifacts', () => {
     it('handles bad API call', async () => {
       jest.spyOn(Apis, 'readFile').mockImplementation(() => { throw new Error('bad call'); });
-      expect(await OutputArtifactLoader.load(storagePath)).toEqual([]);
+      expect(await OutputArtifactLoader.load(storagePath, 'some-run-id')).toEqual([]);
       expect(consoleSpy).toHaveBeenCalled();
 
       jest.spyOn(Apis, 'readFile').mockImplementation(() => fileToRead);
@@ -42,30 +42,30 @@ describe('OutputArtifactLoader', () => {
 
     it('handles an empty file', async () => {
       fileToRead = '';
-      expect(await OutputArtifactLoader.load(storagePath)).toEqual([]);
+      expect(await OutputArtifactLoader.load(storagePath, 'some-run-id')).toEqual([]);
     });
 
     it('handles bad json', async () => {
       fileToRead = 'bad json';
-      expect(await OutputArtifactLoader.load(storagePath)).toEqual([]);
+      expect(await OutputArtifactLoader.load(storagePath, 'some-run-id')).toEqual([]);
       expect(consoleSpy).toHaveBeenCalled();
     });
 
     it('handles an empty json', async () => {
       fileToRead = '{}';
-      expect(await OutputArtifactLoader.load(storagePath)).toEqual([]);
+      expect(await OutputArtifactLoader.load(storagePath, 'some-run-id')).toEqual([]);
       expect(consoleSpy).toHaveBeenCalled();
     });
 
     it('handles json with no "outputs" field', async () => {
       fileToRead = '{}';
-      expect(await OutputArtifactLoader.load(storagePath)).toEqual([]);
+      expect(await OutputArtifactLoader.load(storagePath, 'some-run-id')).toEqual([]);
       expect(consoleSpy).toHaveBeenCalled();
     });
 
     it('handles json with empty "outputs" array', async () => {
       fileToRead = '{"outputs": []}';
-      expect(await OutputArtifactLoader.load(storagePath)).toEqual([]);
+      expect(await OutputArtifactLoader.load(storagePath, 'some-run-id')).toEqual([]);
       expect(consoleSpy).toHaveBeenCalled();
     });
   });
@@ -212,13 +212,13 @@ describe('OutputArtifactLoader', () => {
   describe('buildTensorboardConfig', () => {
     it('requires "source" metadata field', () => {
       const metadata = { header: 'header', format: 'format' };
-      expect(OutputArtifactLoader.buildTensorboardConfig(metadata as any)).rejects.toThrowError(
+      expect(OutputArtifactLoader.buildTensorboardConfig(metadata as any, 'some-run-id')).rejects.toThrowError(
         'Malformed metadata, property "source" is required.');
     });
 
     it('returns a tensorboard config with basic metadata', async () => {
       const metadata = { source: 'gs://path' };
-      expect(await OutputArtifactLoader.buildTensorboardConfig(metadata as any)).toEqual({
+      expect(await OutputArtifactLoader.buildTensorboardConfig(metadata as any, 'some-run-id')).toEqual({
         type: PlotType.TENSORBOARD,
         url: 'gs://path',
       } as TensorboardViewerConfig);
