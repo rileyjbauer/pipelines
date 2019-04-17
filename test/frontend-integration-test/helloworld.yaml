@@ -28,17 +28,17 @@ spec:
   - name: diamond
     dag:
       tasks:
-      - name: A
+      - name: A-test-name-that-is-very-big-like-so-big-wow!
         template: echo
         arguments:
           parameters: [{name: message, value: "{{workflow.parameters.message}} from node: A"}]
       - name: B
-        dependencies: [A]
+        dependencies: [A-test-name-that-is-very-big-like-so-big-wow!]
         template: echo
         arguments:
           parameters: [{name: message, value: "{{workflow.parameters.message}} from node: B"}]
       - name: C
-        dependencies: [A]
+        dependencies: [A-test-name-that-is-very-big-like-so-big-wow!]
         template: echo
         arguments:
           parameters: [{name: message, value: "{{workflow.parameters.message}} from node: C"}]

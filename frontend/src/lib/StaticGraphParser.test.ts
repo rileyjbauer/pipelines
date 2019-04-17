@@ -83,7 +83,7 @@ describe('StaticGraphParser', () => {
       expect(g.nodeCount()).toEqual(1);
       expect(g.edgeCount()).toEqual(0);
       expect(g.nodes()).toContain('/task-1');
-      expect(g.node('/task-1').label).toEqual('container-1');
+      expect(g.node('/task-1').label).toEqual('task-1');
     });
 
     it('adds an unconnected node for the onExit template, if onExit is specified', () => {
@@ -147,14 +147,14 @@ describe('StaticGraphParser', () => {
       expect(g.nodeCount()).toEqual(expectedNodes.length);
     });
 
-    it('uses task\'s template as node label', () => {
+    it('uses task\'s name as node label', () => {
       const g = createGraph(nestedWorkflow);
       expect(g.edgeCount()).toEqual(3);
       const expectedNodes = [
-        { id: '/task-1-1', label: 'dag-2' },
-        { id: '/task-1-1/task-2-1', label: 'container-2-1' },
-        { id: '/task-1-1/task-2-2', label: 'dag-3' },
-        { id: '/task-1-1/task-2-2/task-3-1', label: 'container-3-1' },
+        { id: '/task-1-1', label: 'task-1-1' },
+        { id: '/task-1-1/task-2-1', label: 'task-2-1' },
+        { id: '/task-1-1/task-2-2', label: 'task-2-2' },
+        { id: '/task-1-1/task-2-2/task-3-1', label: 'task-3-1' },
       ];
       expectedNodes.forEach((idAndLabel) => expect(g.node(idAndLabel.id).label).toEqual(idAndLabel.label));
       expect(g.nodeCount()).toEqual(expectedNodes.length);

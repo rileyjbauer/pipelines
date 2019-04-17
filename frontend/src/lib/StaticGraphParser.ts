@@ -159,7 +159,7 @@ function buildDag(
         bgColor: task.when ? 'cornsilk' : undefined,
         height: Constants.NODE_HEIGHT,
         info,
-        label: task.template,
+        label: task.name,
         width: Constants.NODE_WIDTH,
       });
 
