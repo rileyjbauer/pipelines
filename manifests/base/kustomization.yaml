@@ -4,6 +4,7 @@ kind: Kustomization
 bases:
 - argo
 - crds
+- metadata
 - minio
 - mysql
 - pipeline
@@ -25,6 +26,9 @@ images:
   newTag: 0.1.20
 - name: gcr.io/ml-pipeline/frontend
   newTag: 0.1.20
+  # TODO(rjbauer): Change this to something like gcr.io/metadata/frontend:0.0.1
+- name: gcr.io/rjbauer-ml-pipelines/metadata/frontend
+  newTag: 0.0.1
 - name: gcr.io/ml-pipeline/viewer-crd-controller
   newTag: 0.1.20
 - name: gcr.io/ml-pipeline/inverse-proxy-agent
