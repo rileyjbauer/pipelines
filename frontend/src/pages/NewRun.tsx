@@ -26,7 +26,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Radio from '@material-ui/core/Radio';
 import RunUtils from '../lib/RunUtils';
 import ResourceSelector from './ResourceSelector';
-import TextField, { TextFieldProps } from '@material-ui/core/TextField';
+import { TextFieldProps } from '@material-ui/core/TextField';
 import Trigger from '../components/Trigger';
 import WorkflowParser from '../lib/WorkflowParser';
 import { ApiExperiment } from '../apis/experiment';
@@ -43,6 +43,7 @@ import { Workflow } from '../../../frontend/third_party/argo-ui/argo_template';
 import { classes, stylesheet } from 'typestyle';
 import { commonCss, padding, color } from '../Css';
 import { logger, errorToMessage } from '../lib/Utils';
+import NewRunParameters from 'src/components/NewRunParameters';
 
 interface NewRunState {
   description: string;
@@ -306,17 +307,11 @@ class NewRun extends Page<{}, NewRunState> {
           )}
 
           {/* Run parameters form */}
-          <div className={commonCss.header}>Run parameters</div>
-          <div>{this._runParametersMessage()}</div>
-          {!!parameters.length && (
-            <div>
-              {parameters.map((param, i) =>
-                <TextField id={`newRunPipelineParam${i}`} key={i} variant='outlined'
-                  label={param.name} value={param.value || ''}
-                  onChange={(ev) => this._handleParamChange(i, ev.target.value || '')}
-                  style={{ maxWidth: 600 }} className={commonCss.textField}/>)}
-            </div>
-          )}
+          <NewRunParameters
+            initialParams={useWorkflowFromRun ? parametersFromRun : parameters}
+            titleMessage={this._runParametersMessage()}
+            handleParamChange={this._handleParamChange.bind(this)}
+          />
 
           {/* Create/Cancel buttons */}
           <div className={classes(commonCss.flex, padding(20, 'tb'))}>
