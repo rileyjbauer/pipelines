@@ -30,7 +30,7 @@ import TextField, { TextFieldProps } from '@material-ui/core/TextField';
 import Trigger from '../components/Trigger';
 import WorkflowParser from '../lib/WorkflowParser';
 import { ApiExperiment } from '../apis/experiment';
-import { ApiPipeline } from '../apis/pipeline';
+import { ApiPipeline, ApiParameter } from '../apis/pipeline';
 import { ApiRun, ApiResourceReference, ApiRelationship, ApiResourceType, ApiRunDetail } from '../apis/run';
 import { ApiTrigger, ApiJob } from '../apis/job';
 import { Apis, PipelineSortKeys, ExperimentSortKeys } from '../lib/Apis';
@@ -54,12 +54,16 @@ interface NewRunState {
   isFirstRunInExperiment: boolean;
   isRecurringRun: boolean;
   maxConcurrentRuns?: string;
+  parameters: ApiParameter[];
+  // By storing this here instead of in the 'parameters' field, we won't lose it if the user selects
+  // a different pipeline.
+  parametersFromRun: ApiParameter[];
   pipeline?: ApiPipeline;
   // This represents a pipeline from a run that is being cloned, or if a user is creating a run from
   // a pipeline that was not uploaded to the system (as in the case of runs created from notebooks).
   // By storing this here instead of in the 'pipeline' field, we won't lose it if the user selects a
   // different pipeline.
-  pipelineFromRun?: ApiPipeline;
+  workflowFromRun?: Workflow;
   // TODO: this is only here to properly display the name in the text field.
   // There is definitely a way to do this that doesn't necessitate this being in state.
   // Note: this cannot be undefined/optional or the label animation for the input field will not
@@ -70,7 +74,7 @@ interface NewRunState {
   trigger?: ApiTrigger;
   unconfirmedSelectedExperiment?: ApiExperiment;
   unconfirmedSelectedPipeline?: ApiPipeline;
-  usePipelineFromRun: boolean;
+  useWorkflowFromRun: boolean;
   usePipelineFromRunLabel: string;
 }
 
@@ -108,11 +112,13 @@ class NewRun extends Page<{}, NewRunState> {
       isBeingStarted: false,
       isFirstRunInExperiment: false,
       isRecurringRun: false,
+      parameters: [],
+      parametersFromRun: [],
       pipelineName: '',
       pipelineSelectorOpen: false,
       runName: '',
-      usePipelineFromRun: false,
       usePipelineFromRunLabel: 'Use pipeline from cloned run',
+      useWorkflowFromRun: false,
     };
   }
 
@@ -126,21 +132,23 @@ class NewRun extends Page<{}, NewRunState> {
 
   public render(): JSX.Element {
     const {
-      pipelineFromRun,
+      workflowFromRun,
       description,
       errorMessage,
       experimentName,
       experimentSelectorOpen,
       isRecurringRun,
       isFirstRunInExperiment,
+      parameters,
+      parametersFromRun,
       pipeline,
       pipelineName,
       pipelineSelectorOpen,
       runName,
       unconfirmedSelectedExperiment,
       unconfirmedSelectedPipeline,
-      usePipelineFromRun,
       usePipelineFromRunLabel,
+      useWorkflowFromRun,
     } = this.state;
 
     const originalRunId = new URLParser(this.props).get(QUERY_PARAMS.cloneFromRun);
@@ -156,16 +164,19 @@ class NewRun extends Page<{}, NewRunState> {
           <div className={commonCss.header}>Run details</div>
 
           {/* Pipeline selection */}
-          {!!pipelineFromRun && (<React.Fragment>
-            <FormControlLabel label={usePipelineFromRunLabel} control={<Radio color='primary' />}
-              onChange={() => this.setStateSafe({ pipeline: pipelineFromRun, usePipelineFromRun: true })}
-              checked={usePipelineFromRun} />
-            {!!originalRunId && <Link to={pipelineDetailsUrl}>[View pipeline]</Link>}
-            <FormControlLabel label='Select a pipeline from list' control={<Radio color='primary' />}
-              onChange={() => this.setStateSafe({ pipeline: undefined, usePipelineFromRun: false })}
-              checked={!usePipelineFromRun} />
-          </React.Fragment>)}
-          {!usePipelineFromRun && (
+          {!!workflowFromRun && (
+            <React.Fragment>
+              <FormControlLabel label={usePipelineFromRunLabel} control={<Radio color='primary' />}
+                onChange={() => this.setStateSafe({ parameters: parametersFromRun, useWorkflowFromRun: true })}
+                checked={useWorkflowFromRun} />
+              {!!originalRunId && <Link to={pipelineDetailsUrl}>[View pipeline]</Link>}
+              <FormControlLabel label='Select a pipeline from list' control={<Radio color='primary' />}
+                onChange={() => this.setStateSafe({
+                  parameters: (pipeline && pipeline.parameters) || [], useWorkflowFromRun: false })}
+                checked={!useWorkflowFromRun} />
+            </React.Fragment>
+          )}
+          {!useWorkflowFromRun && (
             <Input value={pipelineName} required={true} label='Pipeline' disabled={true}
               variant='outlined'
               InputProps={{
@@ -277,7 +288,7 @@ class NewRun extends Page<{}, NewRunState> {
           <FormControlLabel id='oneOffToggle' label='One-off' control={<Radio color='primary' />}
             onChange={() => this._updateRecurringRunState(false)}
             checked={!isRecurringRun} />
-          <FormControlLabel label='Recurring' control={<Radio color='primary' id='recurringToggle' />}
+          <FormControlLabel id='recurringToggle' label='Recurring' control={<Radio color='primary' />}
             onChange={() => this._updateRecurringRunState(true)}
             checked={isRecurringRun} />
 
@@ -296,10 +307,10 @@ class NewRun extends Page<{}, NewRunState> {
 
           {/* Run parameters form */}
           <div className={commonCss.header}>Run parameters</div>
-          <div>{this._runParametersMessage(pipeline)}</div>
-          {pipeline && Array.isArray(pipeline.parameters) && !!pipeline.parameters.length && (
+          <div>{this._runParametersMessage()}</div>
+          {!!parameters.length && (
             <div>
-              {pipeline.parameters.map((param, i) =>
+              {parameters.map((param, i) =>
                 <TextField id={`newRunPipelineParam${i}`} key={i} variant='outlined'
                   label={param.name} value={param.value || ''}
                   onChange={(ev) => this._handleParamChange(i, ev.target.value || '')}
@@ -394,12 +405,13 @@ class NewRun extends Page<{}, NewRunState> {
       }
     }
 
-    const isRecurringRun = urlParser.get(QUERY_PARAMS.isRecurring) === '1';
-    this.props.updateToolbar({
-      actions: this.props.toolbarProps.actions,
-      breadcrumbs,
-      pageTitle: isRecurringRun ? 'Start a recurring run' : 'Start a new run',
-    });
+    // _prepareFormFromClone and _prepareFormFromEmbeddedPipeline above can set isRecurringRun in
+    // state so we need to check it along with the query params
+    const isRecurringRun =
+        this.state.isRecurringRun || urlParser.get(QUERY_PARAMS.isRecurring) === '1';
+    const pageTitle = isRecurringRun ? 'Start a recurring run' : 'Start a new run';
+
+    this.props.updateToolbar({ actions: this.props.toolbarProps.actions, breadcrumbs, pageTitle });
 
     this.setStateSafe({
       experiment,
@@ -430,12 +442,14 @@ class NewRun extends Page<{}, NewRunState> {
   }
 
   protected async _pipelineSelectorClosed(confirmed: boolean): Promise<void> {
-    let { pipeline } = this.state;
+    let { parameters, pipeline } = this.state;
     if (confirmed && this.state.unconfirmedSelectedPipeline) {
       pipeline = this.state.unconfirmedSelectedPipeline;
+      parameters = pipeline.parameters || [];
     }
 
     this.setStateSafe({
+      parameters,
       pipeline,
       pipelineName: (pipeline && pipeline.name) || '',
       pipelineSelectorOpen: false
@@ -451,9 +465,10 @@ class NewRun extends Page<{}, NewRunState> {
 
   private async _prepareFormFromEmbeddedPipeline(embeddedPipelineRunId: string): Promise<void> {
     let embeddedPipelineSpec: string | null;
+    let runWithEmbeddedPipeline: ApiRunDetail;
 
     try {
-      const runWithEmbeddedPipeline = await Apis.runServiceApi.getRun(embeddedPipelineRunId);
+      runWithEmbeddedPipeline = await Apis.runServiceApi.getRun(embeddedPipelineRunId);
       embeddedPipelineSpec = RunUtils.getPipelineSpec(runWithEmbeddedPipeline.run);
     } catch (err) {
       await this.showPageError(
@@ -470,12 +485,16 @@ class NewRun extends Page<{}, NewRunState> {
 
     try {
       const pipeline = JSON.parse(embeddedPipelineSpec);
+      const parameters = await this.getParametersFromRun(runWithEmbeddedPipeline);
       this.setStateSafe({
+        isRecurringRun: RunUtils.isRecurringRun(runWithEmbeddedPipeline.run),
+        parameters,
+        parametersFromRun: parameters,
         pipeline,
-        pipelineFromRun: pipeline,
         pipelineName: (pipeline && pipeline.name) || '',
-        usePipelineFromRun: true,
         usePipelineFromRunLabel: 'Use pipeline from previous step',
+        useWorkflowFromRun: true,
+        workflowFromRun: pipeline,
       });
     } catch (err) {
       await this.showPageError(
@@ -493,11 +512,11 @@ class NewRun extends Page<{}, NewRunState> {
       return;
     }
 
-    let pipeline: ApiPipeline;
-    let workflow: Workflow;
-    let pipelineFromRun: ApiPipeline;
-    let usePipelineFromRun = false;
+    let pipeline: ApiPipeline | undefined;
+    let workflowFromRun: Workflow | undefined;
+    let useWorkflowFromRun = false;
     let usePipelineFromRunLabel = '';
+    let name = '';
 
     // This corresponds to a run using a pipeline that has been uploaded
     const referencePipelineId = RunUtils.getPipelineId(originalRun.run);
@@ -507,6 +526,7 @@ class NewRun extends Page<{}, NewRunState> {
     if (referencePipelineId) {
       try {
         pipeline = await Apis.pipelineServiceApi.getPipeline(referencePipelineId);
+        name = pipeline.name || '';
       } catch (err) {
         await this.showPageError(
           'Error: failed to find a pipeline corresponding to that of the original run:'
@@ -515,13 +535,13 @@ class NewRun extends Page<{}, NewRunState> {
       }
     } else if (embeddedPipelineSpec) {
       try {
-        pipeline = JSON.parse(embeddedPipelineSpec);
-        pipelineFromRun = pipeline;
+        workflowFromRun = JSON.parse(embeddedPipelineSpec);
+        name = workflowFromRun!.metadata.name || '';
       } catch (err) {
         await this.showPageError('Error: failed to read the clone run\'s pipeline definition.', err);
         return;
       }
-      usePipelineFromRun = true;
+      useWorkflowFromRun = true;
       usePipelineFromRunLabel = 'Use pipeline from cloned run';
     } else {
       await this.showPageError('Could not find the cloned run\'s pipeline definition.');
@@ -533,32 +553,39 @@ class NewRun extends Page<{}, NewRunState> {
       logger.error(originalRun.pipeline_runtime!.workflow_manifest);
       return;
     }
-    try {
-      workflow = JSON.parse(originalRun.pipeline_runtime!.workflow_manifest!) as Workflow;
-    } catch (err) {
-      await this.showPageError('Error: failed to parse the original run\'s runtime.', err);
-      logger.error(originalRun.pipeline_runtime!.workflow_manifest);
-      return;
-    }
 
-    // Set pipeline parameter values from run's workflow
-    pipeline.parameters = WorkflowParser.getParameters(workflow);
+    const parameters = await this.getParametersFromRun(originalRun);
 
     this.setStateSafe({
+      isRecurringRun: RunUtils.isRecurringRun(originalRun.run),
+      parameters,
+      parametersFromRun: parameters,
       pipeline,
-      pipelineFromRun: pipelineFromRun!,
-      pipelineName: (pipeline && pipeline.name) || '',
+      pipelineName: name,
       runName: this._getCloneName(originalRun.run.name!),
-      usePipelineFromRun,
       usePipelineFromRunLabel,
+      useWorkflowFromRun,
+      workflowFromRun,
     });
 
     this._validate();
   }
 
-  private _runParametersMessage(selectedPipeline: ApiPipeline | undefined): string {
-    if (selectedPipeline) {
-      if (selectedPipeline.parameters && selectedPipeline.parameters.length) {
+  private async getParametersFromRun(run: ApiRunDetail): Promise<ApiParameter[]> {
+    try {
+      const workflow = JSON.parse(run.pipeline_runtime!.workflow_manifest!) as Workflow;
+      // Set pipeline parameter values from run's workflow
+      return WorkflowParser.getParameters(workflow);
+    } catch (err) {
+      await this.showPageError('Error: failed to parse the original run\'s runtime.', err);
+      logger.error(run.pipeline_runtime!.workflow_manifest);
+      return [];
+    }
+  }
+
+  private _runParametersMessage(): string {
+    if (this.state.pipeline || this.state.workflowFromRun) {
+      if (this.state.parameters.length) {
         return 'Specify parameters required by the pipeline';
       } else {
         return 'This pipeline has no parameters';
@@ -568,9 +595,7 @@ class NewRun extends Page<{}, NewRunState> {
   }
 
   private _start(): void {
-    // TODO: This cannot currently be reached because _validate() is called everywhere and blocks
-    // the button from being clicked without first having a pipeline.
-    if (!this.state.pipeline) {
+    if (!this.state.pipeline && !this.state.workflowFromRun) {
       this.showErrorDialog('Run creation failed', 'Cannot start run without pipeline');
       logger.error('Cannot start run without pipeline');
       return;
@@ -590,10 +615,10 @@ class NewRun extends Page<{}, NewRunState> {
       description: this.state.description,
       name: this.state.runName,
       pipeline_spec: {
-        parameters: this.state.pipeline.parameters,
-        pipeline_id: this.state.usePipelineFromRun ? undefined : this.state.pipeline.id,
-        workflow_manifest: this.state.usePipelineFromRun
-          ? JSON.stringify(this.state.pipelineFromRun)
+        parameters: this.state.parameters,
+        pipeline_id: this.state.pipeline ? this.state.pipeline.id : undefined,
+        workflow_manifest: this.state.useWorkflowFromRun
+          ? JSON.stringify(this.state.workflowFromRun)
           : undefined,
       },
       resource_references: references,
@@ -638,12 +663,17 @@ class NewRun extends Page<{}, NewRunState> {
   }
 
   private _handleParamChange(index: number, value: string): void {
-    const { pipeline } = this.state;
-    if (!pipeline || !pipeline.parameters) {
+    const { parametersFromRun, pipeline, useWorkflowFromRun } = this.state;
+    if (pipeline && pipeline.parameters) {
+      pipeline.parameters[index].value = value;
+      this.setStateSafe({ pipeline });
+      return;
+    } else if (useWorkflowFromRun) {
+      parametersFromRun[index].value = value;
+      this.setStateSafe({ parametersFromRun });
       return;
     }
-    pipeline.parameters[index].value = value;
-    this.setStateSafe({ pipeline });
+    logger.error('Error: somehow modifying parameters without a pipeline');
   }
 
   private _getCloneName(oldName: string): string {
@@ -659,9 +689,9 @@ class NewRun extends Page<{}, NewRunState> {
 
   private _validate(): void {
     // Validate state
-    const { pipeline, maxConcurrentRuns, runName, trigger } = this.state;
+    const { pipeline, workflowFromRun: pipelineFromRun, maxConcurrentRuns, runName, trigger } = this.state;
     try {
-      if (!pipeline) {
+      if (!pipeline && !pipelineFromRun) {
         throw new Error('A pipeline must be selected');
       }
       if (!runName) {

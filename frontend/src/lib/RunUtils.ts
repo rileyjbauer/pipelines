@@ -88,6 +88,19 @@ function extractMetricMetadata(runs: ApiRun[]): MetricMetadata[] {
   return orderBy(metrics, ['count', 'name'], ['desc', 'asc']);
 }
 
+function isRecurringRun(run?: ApiRun): boolean {
+  if (!run) {
+    return false;
+  }
+
+  for (const ref of run.resource_references || []) {
+    if (ref.key && ref.key.type === ApiResourceType.JOB) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export default {
   extractMetricMetadata,
   getAllExperimentReferences,
@@ -95,5 +108,6 @@ export default {
   getFirstExperimentReferenceId,
   getPipelineId,
   getPipelineSpec,
+  isRecurringRun,
   runsToMetricMetadataMap,
 };
