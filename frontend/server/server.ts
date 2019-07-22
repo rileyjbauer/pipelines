@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import * as express from 'express';
+import * as cors from 'cors';
 import {Application, static as StaticHandler} from 'express';
 import * as fs from 'fs';
 import * as proxy from 'http-proxy-middleware';
@@ -77,7 +78,13 @@ const s3Client = new MinioClient({
 
 const app = express() as Application;
 
-app.use(function (req, _, next) {
+const corsOptions = {
+  origin: 'https://237d634c6455baa6-dot-datalab-vm-us-west1.googleusercontent.com',
+  credentials: true,
+  // preflightContinue: true,
+};
+
+app.use(cors(corsOptions), function (req, _, next) {
   console.info(req.method + ' ' + req.originalUrl);
   next();
 });
