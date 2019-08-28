@@ -104,6 +104,10 @@ class PipelineList extends Page<{}, PipelineListState> {
   }
 
   private async _reload(request: ListRequest): Promise<string> {
+    // tslint:disable-next-line:no-console
+    console.log('calling metadata!');
+    // tslint:disable-next-line:no-console
+    console.log(await Apis.getMetadata());
     let response: ApiListPipelinesResponse | null = null;
     try {
       response = await Apis.pipelineServiceApi.listPipelines(

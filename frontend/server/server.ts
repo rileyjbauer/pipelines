@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import * as express from 'express';
-import {Application, static as StaticHandler} from 'express';
+import { Application, static as StaticHandler } from 'express';
 import * as fs from 'fs';
 import * as proxy from 'http-proxy-middleware';
-import {Client as MinioClient} from 'minio';
+import { Client as MinioClient } from 'minio';
 import fetch from 'node-fetch';
 import * as path from 'path';
 import * as process from 'process';
@@ -25,9 +25,13 @@ import * as tar from 'tar';
 import * as k8sHelper from './k8s-helper';
 import proxyMiddleware from './proxy-middleware';
 import { Storage } from '@google-cloud/storage';
-import {Stream} from 'stream';
+import { Stream } from 'stream';
 
-import {loadJSON} from './utils';
+import { loadJSON } from './utils';
+import * as protoloader from '@grpc/proto-loader';
+import * as grpc from 'grpc';
+import { ml_metadata } from './compiled';
+
 
 const BASEPATH = '/pipeline';
 
@@ -315,7 +319,7 @@ const logsHandler = async (req, res) => {
 const clusterNameHandler = async (req, res) => {
   const response = await fetch(
     'http://metadata/computeMetadata/v1/instance/attributes/cluster-name',
-    { headers: {'Metadata-Flavor': 'Google' } }
+    { headers: { 'Metadata-Flavor': 'Google' } }
   );
   res.send(await response.text());
 };
@@ -323,10 +327,68 @@ const clusterNameHandler = async (req, res) => {
 const projectIdHandler = async (req, res) => {
   const response = await fetch(
     'http://metadata/computeMetadata/v1/project/project-id',
-    { headers: {'Metadata-Flavor': 'Google' } }
+    { headers: { 'Metadata-Flavor': 'Google' } }
   );
   res.send(await response.text());
 };
+
+const metadataHandler = async (req, res) => {
+  const service = protoloader.loadSync(
+    './protos/metadata_store_service.proto',
+    {
+      keepCase: false,
+      longs: String,
+      enums: String,
+      defaults: true,
+      oneofs: true,
+      // includeDirs: [path.join(__dirname, '../')]
+    });
+    // TODO: use type instead of any
+    const grpcObject = grpc.loadPackageDefinition(service);
+
+//     const Client = grpc.makeGenericClientConstructor({})
+//     const client = new Client(
+//       grpcServerUrl,
+//       grpc.credentials.createInsecure()
+// )
+//     const rpcImpl = function(method, requestData, callback) {
+//       client.makeUnaryRequest(
+//         method.name,
+//         arg => arg,
+//         arg => arg,
+//         requestData,
+//         callback
+//       )
+          // TODO: probably shouldn't use insecue?
+    const client: ml_metadata.MetadataStoreService =
+      new grpcObject.ml_metadata['MetadataStoreService']('localhost:8080', grpc.credentials.createInsecure());
+    const makeRequest = (request: ml_metadata.PutExecutionTypeRequest) => {
+      return new Promise((resolve, reject) => {
+        client.putExecutionType(
+          request,
+          (error, response) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(response);
+          });
+      });
+    }
+    const result = await makeRequest({
+      executionType: {
+        id: 1,
+        name: 'execution_type_one',
+      },
+      allFieldsMatch: true,
+      // canAddFields: true,
+      // canDeleteFields: true,
+      // toJSON: () => JSON
+    } as any)
+    res.send(result);
+};
+
+app.get('/' + v1beta1Prefix + '/metadata', metadataHandler);
+app.get(BASEPATH + '/' + v1beta1Prefix + '/metadata', metadataHandler);
 
 app.get('/' + v1beta1Prefix + '/healthz', healthzHandler);
 app.get(BASEPATH + '/' + v1beta1Prefix + '/healthz', healthzHandler);
@@ -362,7 +424,7 @@ app.all('/' + v1beta1Prefix + '/*', proxy({
   target: apiServerAddress,
 }));
 
-app.all(BASEPATH  + '/' + v1beta1Prefix + '/*', proxy({
+app.all(BASEPATH + '/' + v1beta1Prefix + '/*', proxy({
   changeOrigin: true,
   onProxyReq: proxyReq => {
     console.log('Proxied request: ', (proxyReq as any).path);

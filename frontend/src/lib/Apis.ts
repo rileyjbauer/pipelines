@@ -87,6 +87,10 @@ export class Apis {
     return this._visualizationServiceApi;
   }
 
+  public static async getMetadata(): Promise<string> {
+    return await this._fetch('/metadata', v1beta1Prefix);
+  }
+
   /**
    * Retrieve various information about the build.
    */
