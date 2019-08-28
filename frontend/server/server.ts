@@ -28,9 +28,10 @@ import { Storage } from '@google-cloud/storage';
 import { Stream } from 'stream';
 
 import { loadJSON } from './utils';
-import * as protoloader from '@grpc/proto-loader';
+import {MetadataStoreServiceClient} from './node_client/metadata_store_service_grpc_pb';
+import {PutExecutionTypeRequest} from './node_client/metadata_store_service_pb';
+import {ExecutionType} from './node_client/metadata_store_pb';
 import * as grpc from 'grpc';
-import { ml_metadata } from './compiled';
 
 
 const BASEPATH = '/pipeline';
@@ -333,36 +334,66 @@ const projectIdHandler = async (req, res) => {
 };
 
 const metadataHandler = async (req, res) => {
-  const service = protoloader.loadSync(
-    './protos/metadata_store_service.proto',
-    {
-      keepCase: false,
-      longs: String,
-      enums: String,
-      defaults: true,
-      oneofs: true,
-      // includeDirs: [path.join(__dirname, '../')]
-    });
-    // TODO: use type instead of any
-    const grpcObject = grpc.loadPackageDefinition(service);
+//   const service = protoloader.loadSync(
+//     './protos/metadata_store_service.proto',
+//     {
+//       keepCase: false,
+//       longs: String,
+//       enums: String,
+//       defaults: true,
+//       oneofs: true,
+//       // includeDirs: [path.join(__dirname, '../')]
+//     });
+//     // TODO: use type instead of any
+//     const grpcObject = grpc.loadPackageDefinition(service);
 
-//     const Client = grpc.makeGenericClientConstructor({})
-//     const client = new Client(
-//       grpcServerUrl,
-//       grpc.credentials.createInsecure()
-// )
-//     const rpcImpl = function(method, requestData, callback) {
-//       client.makeUnaryRequest(
-//         method.name,
-//         arg => arg,
-//         arg => arg,
-//         requestData,
-//         callback
-//       )
-          // TODO: probably shouldn't use insecue?
-    const client: ml_metadata.MetadataStoreService =
-      new grpcObject.ml_metadata['MetadataStoreService']('localhost:8080', grpc.credentials.createInsecure());
-    const makeRequest = (request: ml_metadata.PutExecutionTypeRequest) => {
+// //     const Client = grpc.makeGenericClientConstructor({})
+// //     const client = new Client(
+// //       grpcServerUrl,
+// //       grpc.credentials.createInsecure()
+// // )
+// //     const rpcImpl = function(method, requestData, callback) {
+// //       client.makeUnaryRequest(
+// //         method.name,
+// //         arg => arg,
+// //         arg => arg,
+// //         requestData,
+// //         callback
+// //       )
+//           // TODO: probably shouldn't use insecue?
+//     const client: ml_metadata.MetadataStoreService =
+//       new grpcObject.ml_metadata['MetadataStoreService']('localhost:8080', grpc.credentials.createInsecure());
+//     const makeRequest = (request: ml_metadata.PutExecutionTypeRequest) => {
+//       return new Promise((resolve, reject) => {
+//         client.putExecutionType(
+//           request,
+//           (error, response) => {
+//             if (error) {
+//               reject(error);
+//             }
+//             resolve(response);
+//           });
+//       });
+//     }
+//     const result = await makeRequest({
+//       executionType: {
+//         id: 1,
+//         name: 'execution_type_one',
+//       },
+//       allFieldsMatch: true,
+//       // canAddFields: true,
+//       // canDeleteFields: true,
+//       // toJSON: () => JSON
+//     } as any)
+//     res.send(result);
+    const client= new MetadataStoreServiceClient('0.0.0.0:8080', grpc.credentials.createInsecure());
+    const request = new PutExecutionTypeRequest();
+    const exec_type = new ExecutionType();
+    exec_type.setId(1);
+    exec_type.setName('exec_type_one');
+    request.setExecutionType(exec_type);
+    request.setAllFieldsMatch(true);
+    const makeRequest = (request: PutExecutionTypeRequest) => {
       return new Promise((resolve, reject) => {
         client.putExecutionType(
           request,
@@ -374,17 +405,16 @@ const metadataHandler = async (req, res) => {
           });
       });
     }
-    const result = await makeRequest({
-      executionType: {
-        id: 1,
-        name: 'execution_type_one',
-      },
-      allFieldsMatch: true,
-      // canAddFields: true,
-      // canDeleteFields: true,
-      // toJSON: () => JSON
-    } as any)
+    const result = await makeRequest(request);
     res.send(result);
+    // client.putExecutionType(request, (err, rep) => {
+    //   if(err){
+    //     res.status(500).send('Failed to put execution type. Error: ' + err);
+    //   } else{
+    //     res.send(rep.getTypeId());
+    //   }
+    // });
+
 };
 
 app.get('/' + v1beta1Prefix + '/metadata', metadataHandler);
